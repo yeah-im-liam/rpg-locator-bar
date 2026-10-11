@@ -3,7 +3,7 @@ allprojects {
     afterEvaluate { p ->
         if (p.name in ['fabric', 'neoforge'] && p.extensions.findByName('loom') != null) {
             p.loom.runs.configureEach { run ->
-                if (run.name == 'client') {
+                if (run.name == 'client' && new File(p.projectDir, 'run/saves/New World').exists()) {
                     run.programArg('--quickPlaySingleplayer')
                     run.programArg('New World')
                 }

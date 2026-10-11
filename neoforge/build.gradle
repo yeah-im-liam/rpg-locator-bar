@@ -54,6 +54,7 @@ shadowJar {
     // NeoForge runs on Mojang names: no Fabric refmap, and its own mixin config instead of the Fabric one
     exclude 'rpglocatorbar-refmap.json'
     exclude 'rpglocatorbar.mixins.json'
+    exclude 'yeah/im/liam/rpglocatorbar/mixin/GuiMixin.class'
 }
 
 remapJar {
