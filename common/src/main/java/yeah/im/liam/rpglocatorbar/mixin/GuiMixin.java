@@ -1,5 +1,7 @@
 package yeah.im.liam.rpglocatorbar.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
@@ -8,13 +10,12 @@ import net.minecraft.client.gui.contextualbar.ContextualBarRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Desc;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import yeah.im.liam.rpglocatorbar.hud.LocatorHud;
 
 @Mixin(Gui.class)
 public abstract class GuiMixin {
-    @Redirect(
+    @WrapOperation(
         method = "renderHotbarAndDecorations",
         at = @At(
             value = "INVOKE",
@@ -22,11 +23,11 @@ public abstract class GuiMixin {
         ),
         require = 0
     )
-    private void rpglocatorbar$renderContextualBars(ContextualBarRenderer renderer, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-        LocatorHud.renderContextualBars(renderer, guiGraphics, deltaTracker);
+    private void rpglocatorbar$renderContextualBars(ContextualBarRenderer renderer, GuiGraphics guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
+        LocatorHud.renderContextualBars(renderer, guiGraphics, deltaTracker, () -> original.call(renderer, guiGraphics, deltaTracker));
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "renderHotbarAndDecorations",
         at = @At(
             value = "INVOKE",
@@ -34,7 +35,7 @@ public abstract class GuiMixin {
         ),
         require = 0
     )
-    private void rpglocatorbar$replaceVanillaLevel(GuiGraphics guiGraphics, Font font, int level) {
-        LocatorHud.renderVanillaExperienceLevel(guiGraphics, font, level);
+    private void rpglocatorbar$replaceVanillaLevel(GuiGraphics guiGraphics, Font font, int level, Operation<Void> original) {
+        LocatorHud.renderVanillaExperienceLevel(() -> original.call(guiGraphics, font, level));
     }
 }

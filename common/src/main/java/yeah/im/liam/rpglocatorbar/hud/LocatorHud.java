@@ -2,7 +2,6 @@ package yeah.im.liam.rpglocatorbar.hud;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.contextualbar.ContextualBarRenderer;
 import net.minecraft.client.gui.contextualbar.ExperienceBarRenderer;
@@ -23,7 +22,7 @@ public final class LocatorHud {
 
     private LocatorHud() {}
 
-    public static void renderContextualBars(ContextualBarRenderer active, GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public static void renderContextualBars(ContextualBarRenderer active, GuiGraphics graphics, DeltaTracker deltaTracker, Runnable renderActive) {
         barsHooked = true;
         Minecraft mc = Minecraft.getInstance();
         LocatorConfig config = LocatorConfigManager.get();
@@ -41,7 +40,7 @@ public final class LocatorHud {
             drawBar(jump(mc, jumpable), graphics, deltaTracker);
         }
         if (plan.renderActive()) {
-            active.render(graphics, deltaTracker);
+            renderActive.run();
         }
         if (plan.drawLocator()) {
             drawBar(locator(mc), graphics, deltaTracker);
@@ -49,9 +48,9 @@ public final class LocatorHud {
         renderExperienceLevel(mc, config, graphics);
     }
 
-    public static void renderVanillaExperienceLevel(GuiGraphics graphics, Font font, int level) {
+    public static void renderVanillaExperienceLevel(Runnable vanillaDraw) {
         if (!barsHooked) {
-            ContextualBarRenderer.renderExperienceLevel(graphics, font, level);
+            vanillaDraw.run();
         }
     }
 
