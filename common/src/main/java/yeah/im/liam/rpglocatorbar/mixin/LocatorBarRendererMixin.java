@@ -14,7 +14,7 @@ public abstract class LocatorBarRendererMixin implements ContextualBarRenderer {
     @Override
     public int top(Window window) {
         int desiredTop = LocatorConfig.DEFAULT_OFFSET + LocatorConfigManager.get().locatorYOffset;
-        int maxTop = window.getGuiScaledHeight() - ContextualBarRenderer.HEIGHT - ContextualBarRenderer.MARGIN_BOTTOM;
+        int maxTop = window.getGuiScaledHeight() - 2 * ContextualBarRenderer.HEIGHT - ContextualBarRenderer.MARGIN_BOTTOM;
         return Mth.clamp(desiredTop, 0, maxTop);
     }
 }
