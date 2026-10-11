@@ -4,6 +4,15 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
 
+def selectedVersion = findProperty('mc') ?: rootProject.minecraft_version
+def versionFile = file("versions/${selectedVersion}.properties")
+if (!versionFile.exists()) {
+    throw new GradleException("Unknown Minecraft version ${selectedVersion}: missing ${versionFile}")
+}
+def versionProperties = new Properties()
+versionFile.withInputStream { versionProperties.load(it) }
+versionProperties.each { key, value -> rootProject.ext.set(key.toString(), value.toString()) }
+
 architectury {
     minecraft = project.minecraft_version
 }
@@ -37,6 +46,9 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+
+    // Classes whose Minecraft API differs between versions live in src/compat/<name>/java.
+    sourceSets.main.java.srcDir "src/compat/${rootProject.compat}/java"
 
     tasks.withType(JavaCompile).configureEach {
         it.options.release = 21

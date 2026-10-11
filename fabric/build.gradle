@@ -38,10 +38,15 @@ dependencies {
 }
 
 processResources {
-    inputs.property 'version', project.version
+    def tokens = [
+        version: project.version,
+        fabric_loader_version: rootProject.fabric_loader_version,
+        fabric_minecraft_range: rootProject.fabric_minecraft_range
+    ]
+    inputs.properties tokens
 
     filesMatching('fabric.mod.json') {
-        expand version: project.version
+        expand tokens
     }
 }
 

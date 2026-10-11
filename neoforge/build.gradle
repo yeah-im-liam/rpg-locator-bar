@@ -39,10 +39,16 @@ dependencies {
 }
 
 processResources {
-    inputs.property 'version', project.version
+    def tokens = [
+        version: project.version,
+        fml_range: rootProject.fml_range,
+        neoforge_range: rootProject.neoforge_range,
+        neoforge_minecraft_range: rootProject.neoforge_minecraft_range
+    ]
+    inputs.properties tokens
 
     filesMatching('META-INF/neoforge.mods.toml') {
-        expand version: project.version
+        expand tokens
     }
 }
 

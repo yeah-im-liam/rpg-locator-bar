@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[10,)"
+loaderVersion = "${fml_range}"
 license = "CC-BY-NC-4.0"
 
 [[mods]]
@@ -15,14 +15,14 @@ logoFile="assets/rpglocatorbar/icon.png"
 [[dependencies.rpglocatorbar]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.11,22)"
+versionRange = "${neoforge_range}"
 ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.rpglocatorbar]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.11,1.22)"
+versionRange = "${neoforge_minecraft_range}"
 ordering = "NONE"
 side = "CLIENT"
 
