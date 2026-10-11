@@ -1,0 +1,30 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+license = "CC-BY-NC-4.0"
+
+[[mods]]
+modId = "rpglocatorbar"
+version = "${version}"
+displayName = "RPG Locator Bar"
+authors = "yeahimliam"
+description = '''
+Makes the locator bar separate from the XP bar and High up like popular RPG's!
+'''
+logoFile="assets/rpglocatorbar/icon.png"
+
+[[dependencies.rpglocatorbar]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.11,22)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.rpglocatorbar]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.11,1.22)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[mixins]]
+config = "rpglocatorbar-neoforge.mixins.json"

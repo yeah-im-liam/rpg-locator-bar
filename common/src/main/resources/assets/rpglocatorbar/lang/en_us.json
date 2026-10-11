@@ -1,0 +1,11 @@
+{
+  "key.rpglocatorbar.config_menu": "RPG Locator Bar Config Menu",
+  "key.category.rpglocatorbar.key_category": "RPG Locator Bar",
+  "rpglocatorbar.config.title": "Locator Bar Settings",
+  "rpglocatorbar.config.offset": "Vertical offset: %spx",
+  "rpglocatorbar.config.render_xp_overlay": "Render XP overlay with locator",
+  "rpglocatorbar.config.hide_xp_creative": "Hide XP bar in creative",
+  "rpglocatorbar.config.keep_locator_during_xp": "Keep locator during XP",
+  "rpglocatorbar.config.always_show_locator": "Locator bar always on",
+  "rpglocatorbar.config.default_settings": "Default Settings"
+}

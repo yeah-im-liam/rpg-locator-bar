@@ -1,0 +1,13 @@
+.gradle/
+.idea/
+.architectury-transformer/
+build/
+bin/
+out/
+run/
+*.log
+*.zip
+
+/META-INF/
+/rpglocatorbar-refmap.json
+/rpglocatorbar.mixins.json

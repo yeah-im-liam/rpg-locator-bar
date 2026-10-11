@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "rpglocatorbar",
+  "version": "${version}",
+  "name": "RPG Locator Bar",
+  "description": "Makes the locator bar separate from the XP bar and High up like popular RPG's!",
+  "authors": [
+    "yeahimliam"
+  ],
+  "license": "CC-BY-NC-4.0",
+  "icon": "assets/rpglocatorbar/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "yeah.im.liam.rpglocatorbar.fabric.client.RpgLocatorBarFabricClient"
+    ],
+    "modmenu": [
+      "yeah.im.liam.rpglocatorbar.fabric.client.ModMenuCompat"
+    ]
+  },
+  "mixins": [
+    "rpglocatorbar.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
