@@ -11,6 +11,8 @@ description = '''
 Makes the locator bar separate from the XP bar and High up like popular RPG's!
 '''
 logoFile="assets/rpglocatorbar/icon.png"
+# NeoForge 26.2+ reads iconFile and warns when only logoFile is set
+iconFile="assets/rpglocatorbar/icon.png"
 
 [[dependencies.rpglocatorbar]]
 modId = "neoforge"
