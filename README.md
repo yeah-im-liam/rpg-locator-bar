@@ -35,7 +35,7 @@ The Default Settings button resets everything to these values.
 ## Links
 
 - Modrinth: https://modrinth.com/mod/rpg-locator-bar
-- Report issues: https://discord.com/users/442740500584464404
+- Report issues: https://github.com/yeah-im-liam/rpg-locator-bar/issues
 - Support: https://ko-fi.com/yeahimliam
 
 ## License
