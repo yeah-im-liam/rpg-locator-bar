@@ -32,23 +32,6 @@ The Default Settings button resets everything to these values.
 - Loaders: Fabric (requires Fabric API, Mod Menu optional) and NeoForge
 - Environment: client
 
-## Building
-
-Requires JDK 21.
-
-```
-./gradlew build
-```
-
-The jars end up in `fabric/build/libs` and `neoforge/build/libs`.
-
-To start a dev client straight in a world named "New World" (in the loader's `run/saves` folder):
-
-```
-./gradlew -I dev/test-world.init.gradle :fabric:runClient
-./gradlew -I dev/test-world.init.gradle :neoforge:runClient
-```
-
 ## Links
 
 - Modrinth: https://modrinth.com/mod/rpg-locator-bar
