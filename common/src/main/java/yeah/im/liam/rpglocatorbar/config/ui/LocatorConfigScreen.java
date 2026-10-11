@@ -5,7 +5,6 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import yeah.im.liam.rpglocatorbar.config.LocatorConfig;
@@ -14,12 +13,14 @@ import yeah.im.liam.rpglocatorbar.config.LocatorConfigManager;
 public final class LocatorConfigScreen extends Screen {
     private static final int MIN_OFFSET_PX = LocatorConfig.MIN_OFFSET;
     private static final int MAX_OFFSET_PX = LocatorConfig.MAX_OFFSET;
+    private static final int SAVE_DELAY_TICKS = 10;
     private final Screen parent;
     private LocatorOffsetSlider offsetSlider;
     private CycleButton<Boolean> xpToggle;
     private CycleButton<Boolean> hideXpCreativeToggle;
     private CycleButton<Boolean> locatorDuringXpToggle;
     private CycleButton<Boolean> locatorAlwaysOnToggle;
+    private int saveCountdown = -1;
 
     public LocatorConfigScreen(Screen parent) {
         super(Component.translatable("rpglocatorbar.config.title"));
@@ -32,7 +33,7 @@ public final class LocatorConfigScreen extends Screen {
         int center = this.width / 2;
         int y = Math.max(20, this.height / 4 - 24);
 
-        offsetSlider = new LocatorOffsetSlider(center - 100, y, 200, 20, config.locatorYOffset);
+        offsetSlider = new LocatorOffsetSlider(center - 100, y, 200, 20, config.locatorYOffset, () -> saveCountdown = SAVE_DELAY_TICKS);
         addRenderableWidget(offsetSlider);
 
         y += 26;
@@ -93,6 +94,16 @@ public final class LocatorConfigScreen extends Screen {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        // Slider drags change the offset many times a second; write the file once the value settles.
+        if (saveCountdown > 0 && --saveCountdown == 0) {
+            LocatorConfigManager.save();
+            saveCountdown = -1;
+        }
+    }
+
+    @Override
     public void onClose() {
         Minecraft.getInstance().setScreen(parent);
     }
@@ -103,10 +114,12 @@ public final class LocatorConfigScreen extends Screen {
     }
 
     private static final class LocatorOffsetSlider extends AbstractSliderButton {
+        private final Runnable onChanged;
         private int offset;
 
-        LocatorOffsetSlider(int x, int y, int width, int height, int initialOffset) {
+        LocatorOffsetSlider(int x, int y, int width, int height, int initialOffset, Runnable onChanged) {
             super(x, y, width, height, Component.empty(), 0.0);
+            this.onChanged = onChanged;
             setOffset(initialOffset);
         }
 
@@ -126,12 +139,7 @@ public final class LocatorConfigScreen extends Screen {
             double range = MAX_OFFSET_PX - MIN_OFFSET_PX;
             this.offset = Mth.clamp((int) Math.round(MIN_OFFSET_PX + this.value * range), MIN_OFFSET_PX, MAX_OFFSET_PX);
             LocatorConfigManager.get().locatorYOffset = this.offset;
-        }
-
-        @Override
-        public void onRelease(MouseButtonEvent event) {
-            super.onRelease(event);
-            LocatorConfigManager.save();
+            onChanged.run();
         }
     }
 }

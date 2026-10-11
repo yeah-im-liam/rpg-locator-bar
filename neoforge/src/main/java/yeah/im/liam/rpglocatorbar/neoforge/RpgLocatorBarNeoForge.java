@@ -31,11 +31,7 @@ public final class RpgLocatorBarNeoForge {
     }
 
     private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        // NeoForge sorts modded categories itself, so KeyMapping.Category.register is not used here.
-        KeyMapping.Category category = new KeyMapping.Category(LocatorKeys.CATEGORY_ID);
-        event.registerCategory(category);
-        openConfigKey = LocatorKeys.createOpenConfigKey(category);
-        event.register(openConfigKey);
+        openConfigKey = NeoForgeKeys.register(event);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {

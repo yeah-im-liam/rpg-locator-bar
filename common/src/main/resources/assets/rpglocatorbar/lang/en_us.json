@@ -1,6 +1,7 @@
 {
   "key.rpglocatorbar.config_menu": "RPG Locator Bar Config Menu",
   "key.category.rpglocatorbar.key_category": "RPG Locator Bar",
+  "key.categories.rpglocatorbar": "RPG Locator Bar",
   "rpglocatorbar.config.title": "Locator Bar Settings",
   "rpglocatorbar.config.offset": "Vertical offset: %spx",
   "rpglocatorbar.config.render_xp_overlay": "Render XP overlay with locator",
