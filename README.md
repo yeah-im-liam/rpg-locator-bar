@@ -28,7 +28,7 @@ The Default Settings button resets everything to these values.
 
 ## Compatibility
 
-- Minecraft: Java Edition 1.21.11
+- Minecraft: Java Edition 1.21.6 to 1.21.11 (one file per version)
 - Loaders: Fabric (requires Fabric API, Mod Menu optional) and NeoForge
 - Environment: client
 

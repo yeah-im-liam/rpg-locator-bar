@@ -2,6 +2,7 @@
 
 ## 1.1.0
 
+- Now available for Minecraft 1.21.6 to 1.21.11 on Fabric and NeoForge.
 - The jump bar on horses and other mounts now stays visible for the whole ride, even when the locator bar is active.
 - The XP bar now shows in Creative when "Hide XP bar in creative" is off, even at level 0.
 - The XP bar now shows under the locator at level 0, like vanilla.
