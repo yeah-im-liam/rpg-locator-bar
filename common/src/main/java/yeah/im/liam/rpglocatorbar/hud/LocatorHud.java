@@ -111,8 +111,7 @@ public final class LocatorHud {
         if (mc.player == null || mc.gameMode == null || mc.options.hideGui) {
             return false;
         }
-        return XpRules.barVisible(mc.player.isSpectator(), isCreative(mc), mc.gameMode.hasExperience(),
-            config.hideXpInCreative, mc.player.experienceLevel);
+        return XpRules.barVisible(mc.player.isSpectator(), isCreative(mc), mc.gameMode.hasExperience(), config.hideXpInCreative);
     }
 
     private static boolean isExperienceLevelVisible(Minecraft mc, LocatorConfig config) {
