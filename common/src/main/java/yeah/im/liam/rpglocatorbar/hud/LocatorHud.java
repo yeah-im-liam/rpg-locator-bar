@@ -28,7 +28,11 @@ public final class LocatorHud {
         Minecraft mc = Minecraft.getInstance();
         LocatorConfig config = LocatorConfigManager.get();
         PlayerRideableJumping jumpable = mc.player != null ? mc.player.jumpableVehicle() : null;
-        BarPlan plan = BarPlan.of(classify(active), config, hasWaypoints(mc), isExperienceVisible(mc, config), jumpable != null);
+        if (jumpable == null) {
+            jumpRenderer = null;
+            jumpRendererVehicle = null;
+        }
+        BarPlan plan = BarPlan.of(classify(active), config, hasWaypoints(mc), isExperienceBarVisible(mc, config), jumpable != null);
 
         if (plan.drawExperience()) {
             drawBar(experience(mc), graphics, deltaTracker);
@@ -52,7 +56,7 @@ public final class LocatorHud {
     }
 
     private static void renderExperienceLevel(Minecraft mc, LocatorConfig config, GuiGraphics graphics) {
-        if (!isExperienceVisible(mc, config)) {
+        if (!isExperienceLevelVisible(mc, config)) {
             return;
         }
         graphics.nextStratum();
@@ -103,16 +107,23 @@ public final class LocatorHud {
         return mc.player != null && mc.player.connection.getWaypointManager().hasWaypoints();
     }
 
-    private static boolean isExperienceVisible(Minecraft mc, LocatorConfig config) {
+    private static boolean isExperienceBarVisible(Minecraft mc, LocatorConfig config) {
         if (mc.player == null || mc.gameMode == null || mc.options.hideGui) {
             return false;
         }
-        if (mc.player.isSpectator() || mc.player.experienceLevel <= 0) {
+        return XpRules.barVisible(mc.player.isSpectator(), isCreative(mc), mc.gameMode.hasExperience(),
+            config.hideXpInCreative, mc.player.experienceLevel);
+    }
+
+    private static boolean isExperienceLevelVisible(Minecraft mc, LocatorConfig config) {
+        if (mc.player == null || mc.gameMode == null || mc.options.hideGui) {
             return false;
         }
-        if (mc.gameMode.getPlayerMode() == GameType.CREATIVE) {
-            return !config.hideXpInCreative;
-        }
-        return mc.gameMode.hasExperience();
+        return XpRules.levelVisible(mc.player.isSpectator(), isCreative(mc), mc.gameMode.hasExperience(),
+            config.hideXpInCreative, mc.player.experienceLevel);
+    }
+
+    private static boolean isCreative(Minecraft mc) {
+        return mc.gameMode.getPlayerMode() == GameType.CREATIVE;
     }
 }
