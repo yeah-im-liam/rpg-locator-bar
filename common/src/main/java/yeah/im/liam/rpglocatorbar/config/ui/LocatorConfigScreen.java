@@ -3,10 +3,13 @@ package yeah.im.liam.rpglocatorbar.config.ui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+
+import java.util.function.Consumer;
+
 import yeah.im.liam.rpglocatorbar.config.LocatorConfig;
 import yeah.im.liam.rpglocatorbar.config.LocatorConfigManager;
 
@@ -16,10 +19,10 @@ public final class LocatorConfigScreen extends Screen {
     private static final int SAVE_DELAY_TICKS = 10;
     private final Screen parent;
     private LocatorOffsetSlider offsetSlider;
-    private CycleButton<Boolean> xpToggle;
-    private CycleButton<Boolean> hideXpCreativeToggle;
-    private CycleButton<Boolean> locatorDuringXpToggle;
-    private CycleButton<Boolean> locatorAlwaysOnToggle;
+    private Toggle xpToggle;
+    private Toggle hideXpCreativeToggle;
+    private Toggle locatorDuringXpToggle;
+    private Toggle locatorAlwaysOnToggle;
     private int saveCountdown = -1;
 
     public LocatorConfigScreen(Screen parent) {
@@ -37,36 +40,20 @@ public final class LocatorConfigScreen extends Screen {
         addRenderableWidget(offsetSlider);
 
         y += 26;
-        xpToggle = CycleButton.onOffBuilder(config.renderExperienceOverlay)
-            .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.render_xp_overlay"), (button, value) -> {
-                config.renderExperienceOverlay = value;
-                LocatorConfigManager.save();
-            });
-        addRenderableWidget(xpToggle);
+        xpToggle = new Toggle(center - 100, y, "rpglocatorbar.config.render_xp_overlay", config.renderExperienceOverlay, value -> config.renderExperienceOverlay = value);
+        addRenderableWidget(xpToggle.button);
 
         y += 24;
-        hideXpCreativeToggle = CycleButton.onOffBuilder(config.hideXpInCreative)
-            .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.hide_xp_creative"), (button, value) -> {
-                config.hideXpInCreative = value;
-                LocatorConfigManager.save();
-            });
-        addRenderableWidget(hideXpCreativeToggle);
+        hideXpCreativeToggle = new Toggle(center - 100, y, "rpglocatorbar.config.hide_xp_creative", config.hideXpInCreative, value -> config.hideXpInCreative = value);
+        addRenderableWidget(hideXpCreativeToggle.button);
 
         y += 24;
-        locatorDuringXpToggle = CycleButton.onOffBuilder(config.keepLocatorVisibleDuringXpGain)
-            .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.keep_locator_during_xp"), (button, value) -> {
-                config.keepLocatorVisibleDuringXpGain = value;
-                LocatorConfigManager.save();
-            });
-        addRenderableWidget(locatorDuringXpToggle);
+        locatorDuringXpToggle = new Toggle(center - 100, y, "rpglocatorbar.config.keep_locator_during_xp", config.keepLocatorVisibleDuringXpGain, value -> config.keepLocatorVisibleDuringXpGain = value);
+        addRenderableWidget(locatorDuringXpToggle.button);
 
         y += 24;
-        locatorAlwaysOnToggle = CycleButton.onOffBuilder(config.alwaysShowLocator)
-            .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.always_show_locator"), (button, value) -> {
-                config.alwaysShowLocator = value;
-                LocatorConfigManager.save();
-            });
-        addRenderableWidget(locatorAlwaysOnToggle);
+        locatorAlwaysOnToggle = new Toggle(center - 100, y, "rpglocatorbar.config.always_show_locator", config.alwaysShowLocator, value -> config.alwaysShowLocator = value);
+        addRenderableWidget(locatorAlwaysOnToggle.button);
 
         y += 24;
         Button reset = Button.builder(Component.translatable("rpglocatorbar.config.default_settings"), b -> {
@@ -105,12 +92,38 @@ public final class LocatorConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().setScreen(parent);
+        Screens.open(Minecraft.getInstance(), parent);
     }
 
     @Override
     public void removed() {
         LocatorConfigManager.save();
+    }
+
+    // A plain button keeps the same look as CycleButton, whose API differs between 1.21.10 and 1.21.11.
+    private static final class Toggle {
+        private final Component name;
+        private final Button button;
+        private boolean value;
+
+        Toggle(int x, int y, String nameKey, boolean value, Consumer<Boolean> onChanged) {
+            this.name = Component.translatable(nameKey);
+            this.value = value;
+            this.button = Button.builder(message(), b -> {
+                setValue(!this.value);
+                onChanged.accept(this.value);
+                LocatorConfigManager.save();
+            }).pos(x, y).size(200, 20).build();
+        }
+
+        void setValue(boolean value) {
+            this.value = value;
+            button.setMessage(message());
+        }
+
+        private Component message() {
+            return CommonComponents.optionStatus(name, value);
+        }
     }
 
     private static final class LocatorOffsetSlider extends AbstractSliderButton {

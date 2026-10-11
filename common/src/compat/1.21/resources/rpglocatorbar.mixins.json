@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "yeah.im.liam.rpglocatorbar.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "refmap": "rpglocatorbar-refmap.json",
+  "client": [
+    "v1_21_6.GuiMixin",
+    "v1_21_6.LocatorBarRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

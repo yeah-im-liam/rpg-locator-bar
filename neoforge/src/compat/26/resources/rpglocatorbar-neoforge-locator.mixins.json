@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "yeah.im.liam.rpglocatorbar.mixin",
+  "plugin": "yeah.im.liam.rpglocatorbar.compat.HudLayoutPlugin",
+  "compatibilityLevel": "JAVA_25",
+  "minVersion": "0.8",
+  "client": [
+    "v26_1.LocatorBarRendererMixin",
+    "v26_2.LocatorBarMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

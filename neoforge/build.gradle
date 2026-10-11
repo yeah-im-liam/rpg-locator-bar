@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 architectury {
@@ -34,14 +34,17 @@ dependencies {
 
     compileOnly "io.github.llamalad7:mixinextras-common:0.5.0"
 
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    if (rootProject.obfuscated) {
+        common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    } else {
+        common(project(path: ':common')) { transitive false }
+    }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 }
 
 processResources {
     def tokens = [
         version: project.version,
-        fml_range: rootProject.fml_range,
         neoforge_range: rootProject.neoforge_range,
         neoforge_minecraft_range: rootProject.neoforge_minecraft_range
     ]
@@ -54,21 +57,34 @@ processResources {
 
 shadowJar {
     configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    // NeoForge runs on Mojang names: no Fabric refmap, and its own mixin config instead of the Fabric one
+    // NeoForge runs on Mojang names and draws the HUD in its own layer methods:
+    // no Fabric refmap, Fabric mixin config or vanilla HUD hooks.
     exclude 'rpglocatorbar-refmap.json'
     exclude 'rpglocatorbar.mixins.json'
-    exclude 'yeah/im/liam/rpglocatorbar/mixin/GuiMixin.class'
+    exclude 'yeah/im/liam/rpglocatorbar/mixin/*/GuiMixin.class'
+    exclude 'yeah/im/liam/rpglocatorbar/mixin/*/HudMixin.class'
 }
 
-remapJar {
-    input.set shadowJar.archiveFile
-}
-
-loom {
-    mixin {
-        useLegacyMixinAp = false
+if (rootProject.obfuscated) {
+    shadowJar {
+        archiveClassifier = 'dev-shadow'
     }
+    remapJar {
+        input.set shadowJar.archiveFile
+    }
+    loom {
+        mixin {
+            useLegacyMixinAp = false
+        }
+    }
+} else {
+    jar {
+        archiveClassifier = 'raw'
+    }
+    shadowJar {
+        archiveClassifier = null
+    }
+    assemble.dependsOn shadowJar
 }

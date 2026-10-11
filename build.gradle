@@ -1,20 +1,23 @@
 plugins {
-    id 'dev.architectury.loom' version '1.13.463' apply false
-    id 'architectury-plugin' version '3.4.162'
-    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+    id 'dev.architectury.loom' version '1.17.493' apply false
+    id 'dev.architectury.loom-no-remap' version '1.17.493' apply false
+    id 'architectury-plugin' version '3.5.170'
+    id 'com.gradleup.shadow' version '9.4.3' apply false
 }
 
-def selectedVersion = findProperty('mc') ?: rootProject.minecraft_version
-def versionFile = file("versions/${selectedVersion}.properties")
-if (!versionFile.exists()) {
-    throw new GradleException("Unknown Minecraft version ${selectedVersion}: missing ${versionFile}")
+def target = findProperty('target') ?: rootProject.default_target
+def targetFile = file("targets/${target}.properties")
+if (!targetFile.exists()) {
+    throw new GradleException("Unknown target ${target}: missing ${targetFile}")
 }
-def versionProperties = new Properties()
-versionFile.withInputStream { versionProperties.load(it) }
-versionProperties.each { key, value -> rootProject.ext.set(key.toString(), value.toString()) }
+def targetProperties = new Properties()
+targetFile.withInputStream { targetProperties.load(it) }
+targetProperties.each { key, value -> rootProject.ext.set(key.toString(), value.toString()) }
+rootProject.ext.target = target
+rootProject.ext.obfuscated = rootProject.obfuscated.toBoolean()
 
 architectury {
-    minecraft = project.minecraft_version
+    minecraft = rootProject.minecraft_version
 }
 
 allprojects {
@@ -23,12 +26,12 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'dev.architectury.loom'
+    // Minecraft 26.1 and later ship without obfuscation, so their jars are not remapped.
+    apply plugin: rootProject.obfuscated ? 'dev.architectury.loom' : 'dev.architectury.loom-no-remap'
     apply plugin: 'architectury-plugin'
-    apply plugin: 'maven-publish'
 
     base {
-        archivesName = "$rootProject.archives_name-$project.name-mc$rootProject.minecraft_version"
+        archivesName = "$rootProject.archives_name-$project.name-mc$rootProject.minecraft_range"
     }
 
     repositories {
@@ -36,40 +39,45 @@ subprojects {
     }
 
     dependencies {
-        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
-        mappings loom.officialMojangMappings()
+        minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
+        if (rootProject.obfuscated) {
+            mappings loom.officialMojangMappings()
+        }
     }
 
     java {
         withSourcesJar()
-
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
     }
 
-    // Classes whose Minecraft API differs between versions live in src/compat/<name>/java.
-    sourceSets.main.java.srcDir "src/compat/${rootProject.compat}/java"
+    // Code that differs between targets lives in src/compat/<target>.
+    sourceSets.main.java.srcDir "src/compat/$target/java"
+    sourceSets.main.resources.srcDir "src/compat/$target/resources"
 
-    tasks.withType(JavaCompile).configureEach {
-        it.options.release = 21
-    }
-
-    loom {
-        mixin {
-            useLegacyMixinAp = true
-            defaultRefmapName.set("rpglocatorbar-refmap.json")
-        }
-    }
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = base.archivesName.get()
-                from components.java
+    // Compile-only copies of classes from older releases in the target, never packaged.
+    def stubsDir = rootProject.file("stubs/$target/java")
+    if (stubsDir.exists()) {
+        sourceSets {
+            stubs {
+                java.srcDir stubsDir
+                compileClasspath = configurations.compileClasspath
             }
         }
+        tasks.named('compileJava') {
+            classpath += sourceSets.stubs.output
+        }
+    }
 
-        repositories {
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+        it.options.release = rootProject.java_version as int
+    }
+
+    if (rootProject.obfuscated) {
+        loom {
+            mixin {
+                useLegacyMixinAp = true
+                defaultRefmapName.set("rpglocatorbar-refmap.json")
+            }
         }
     }
 }

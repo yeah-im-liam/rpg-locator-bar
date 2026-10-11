@@ -2,104 +2,97 @@ package yeah.im.liam.rpglocatorbar.hud;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.contextualbar.ContextualBarRenderer;
-import net.minecraft.client.gui.contextualbar.ExperienceBarRenderer;
-import net.minecraft.client.gui.contextualbar.JumpableVehicleBarRenderer;
-import net.minecraft.client.gui.contextualbar.LocatorBarRenderer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.level.GameType;
 import yeah.im.liam.rpglocatorbar.config.LocatorConfig;
 import yeah.im.liam.rpglocatorbar.config.LocatorConfigManager;
 
-public final class LocatorHud {
-    private static ExperienceBarRenderer experienceRenderer;
-    private static LocatorBarRenderer locatorRenderer;
-    private static JumpableVehicleBarRenderer jumpRenderer;
-    private static PlayerRideableJumping jumpRendererVehicle;
+/**
+ * Draws the contextual bars. Subclasses adapt it to one HUD layout: G is the graphics type and B the bar type.
+ */
+public abstract class LocatorHud<G, B> {
+    private B experienceBar;
+    private B locatorBar;
+    private B jumpBar;
+    private PlayerRideableJumping jumpBarVehicle;
     // Vanilla's level draw is only skipped once this hook has run at least once.
-    private static boolean barsHooked;
+    private boolean barsHooked;
 
-    private LocatorHud() {}
-
-    public static void renderContextualBars(ContextualBarRenderer active, GuiGraphics graphics, DeltaTracker deltaTracker, Runnable renderActive) {
+    public final void renderContextualBars(B active, G graphics, DeltaTracker deltaTracker, Runnable renderActive) {
         barsHooked = true;
         Minecraft mc = Minecraft.getInstance();
         LocatorConfig config = LocatorConfigManager.get();
         PlayerRideableJumping jumpable = mc.player != null ? mc.player.jumpableVehicle() : null;
         if (jumpable == null) {
-            jumpRenderer = null;
-            jumpRendererVehicle = null;
+            jumpBar = null;
+            jumpBarVehicle = null;
         }
         BarPlan plan = BarPlan.of(classify(active), config, hasWaypoints(mc), isExperienceBarVisible(mc, config), jumpable != null);
 
         if (plan.drawExperience()) {
-            drawBar(experience(mc), graphics, deltaTracker);
+            drawBar(experienceBar(mc), graphics, deltaTracker);
         }
         if (plan.drawJump()) {
-            drawBar(jump(mc, jumpable), graphics, deltaTracker);
+            drawBar(jumpBar(mc, jumpable), graphics, deltaTracker);
         }
         if (plan.renderActive()) {
             renderActive.run();
         }
         if (plan.drawLocator()) {
-            drawBar(locator(mc), graphics, deltaTracker);
+            drawBar(locatorBar(mc), graphics, deltaTracker);
         }
-        renderExperienceLevel(mc, config, graphics);
+        if (isExperienceLevelVisible(mc, config)) {
+            drawExperienceLevel(graphics, mc.font, mc.player.experienceLevel);
+        }
     }
 
-    public static void renderVanillaExperienceLevel(Runnable vanillaDraw) {
+    public final void renderVanillaExperienceLevel(Runnable vanillaDraw) {
         if (!barsHooked) {
             vanillaDraw.run();
         }
     }
 
-    private static void renderExperienceLevel(Minecraft mc, LocatorConfig config, GuiGraphics graphics) {
-        if (!isExperienceLevelVisible(mc, config)) {
-            return;
-        }
-        graphics.nextStratum();
-        ContextualBarRenderer.renderExperienceLevel(graphics, mc.font, mc.player.experienceLevel);
+    public static int locatorTop(int guiScaledHeight, int barHeight, int marginBottom) {
+        int desiredTop = LocatorConfig.DEFAULT_OFFSET + LocatorConfigManager.get().locatorYOffset;
+        int maxTop = guiScaledHeight - 2 * barHeight - marginBottom;
+        return Mth.clamp(desiredTop, 0, maxTop);
     }
 
-    private static BarPlan.Active classify(ContextualBarRenderer renderer) {
-        if (renderer instanceof LocatorBarRenderer) {
-            return BarPlan.Active.LOCATOR;
+    protected abstract BarPlan.Active classify(B bar);
+
+    protected abstract B createExperienceBar(Minecraft mc);
+
+    protected abstract B createJumpBar(Minecraft mc);
+
+    protected abstract B createLocatorBar(Minecraft mc);
+
+    protected abstract void drawBar(B bar, G graphics, DeltaTracker deltaTracker);
+
+    protected abstract void drawExperienceLevel(G graphics, Font font, int level);
+
+    private B experienceBar(Minecraft mc) {
+        if (experienceBar == null) {
+            experienceBar = createExperienceBar(mc);
         }
-        if (renderer instanceof ExperienceBarRenderer) {
-            return BarPlan.Active.EXPERIENCE;
-        }
-        if (renderer == ContextualBarRenderer.EMPTY) {
-            return BarPlan.Active.NONE;
-        }
-        return BarPlan.Active.JUMP;
+        return experienceBar;
     }
 
-    private static void drawBar(ContextualBarRenderer renderer, GuiGraphics graphics, DeltaTracker deltaTracker) {
-        renderer.renderBackground(graphics, deltaTracker);
-        renderer.render(graphics, deltaTracker);
+    // The jump bar reads the vehicle when it is created, so it is rebuilt for each new vehicle.
+    private B jumpBar(Minecraft mc, PlayerRideableJumping vehicle) {
+        if (jumpBar == null || jumpBarVehicle != vehicle) {
+            jumpBar = createJumpBar(mc);
+            jumpBarVehicle = vehicle;
+        }
+        return jumpBar;
     }
 
-    private static ExperienceBarRenderer experience(Minecraft mc) {
-        if (experienceRenderer == null) {
-            experienceRenderer = new ExperienceBarRenderer(mc);
+    private B locatorBar(Minecraft mc) {
+        if (locatorBar == null) {
+            locatorBar = createLocatorBar(mc);
         }
-        return experienceRenderer;
-    }
-
-    private static JumpableVehicleBarRenderer jump(Minecraft mc, PlayerRideableJumping vehicle) {
-        if (jumpRenderer == null || jumpRendererVehicle != vehicle) {
-            jumpRenderer = new JumpableVehicleBarRenderer(mc);
-            jumpRendererVehicle = vehicle;
-        }
-        return jumpRenderer;
-    }
-
-    private static LocatorBarRenderer locator(Minecraft mc) {
-        if (locatorRenderer == null) {
-            locatorRenderer = new LocatorBarRenderer(mc);
-        }
-        return locatorRenderer;
+        return locatorBar;
     }
 
     private static boolean hasWaypoints(Minecraft mc) {
@@ -107,14 +100,14 @@ public final class LocatorHud {
     }
 
     private static boolean isExperienceBarVisible(Minecraft mc, LocatorConfig config) {
-        if (mc.player == null || mc.gameMode == null || mc.options.hideGui) {
+        if (mc.player == null || mc.gameMode == null) {
             return false;
         }
         return XpRules.barVisible(mc.player.isSpectator(), isCreative(mc), mc.gameMode.hasExperience(), config.hideXpInCreative);
     }
 
     private static boolean isExperienceLevelVisible(Minecraft mc, LocatorConfig config) {
-        if (mc.player == null || mc.gameMode == null || mc.options.hideGui) {
+        if (mc.player == null || mc.gameMode == null) {
             return false;
         }
         return XpRules.levelVisible(mc.player.isSpectator(), isCreative(mc), mc.gameMode.hasExperience(),

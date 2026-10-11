@@ -3,6 +3,7 @@ package yeah.im.liam.rpglocatorbar.input;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import yeah.im.liam.rpglocatorbar.config.ui.LocatorConfigScreen;
+import yeah.im.liam.rpglocatorbar.config.ui.Screens;
 
 public final class LocatorKeys {
     public static final String NAME = "key.rpglocatorbar.config_menu";
@@ -14,7 +15,7 @@ public final class LocatorKeys {
         Minecraft mc = Minecraft.getInstance();
         while (key.consumeClick()) {
             if (mc.player != null) {
-                mc.setScreen(new LocatorConfigScreen(mc.screen));
+                Screens.open(mc, new LocatorConfigScreen(Screens.current(mc)));
             }
         }
     }

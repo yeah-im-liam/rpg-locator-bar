@@ -3,10 +3,13 @@ architectury {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-
+    if (rootProject.obfuscated) {
+        modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+        annotationProcessor "io.github.llamalad7:mixinextras-common:0.5.0"
+    } else {
+        implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    }
     compileOnly "io.github.llamalad7:mixinextras-common:0.5.0"
-    annotationProcessor "io.github.llamalad7:mixinextras-common:0.5.0"
 
     testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.11.4"
