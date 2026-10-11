@@ -8,6 +8,7 @@
 - The locator bar stops above the XP bar instead of overlapping it at large GUI scales.
 - The settings screen applies changes live (including the vertical offset) and saves them as you change them.
 - A broken config file no longer crashes the game; it falls back to the defaults.
+- Fabric: fixed the HUD changes (XP bar under the locator, keeping the locator during XP gain, always-on) not being applied in normal installs of 1.0.1. Only the locator position was.
 - NeoForge: the config keybind is now saved, the XP bar and locator are no longer drawn twice, and the mod no longer loads on dedicated servers.
 - The Architectury API is no longer required.
 - Better compatibility with other HUD mods.
