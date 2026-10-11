@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import yeah.im.liam.rpglocatorbar.config.LocatorConfig;
@@ -38,6 +39,7 @@ public final class LocatorConfigScreen extends Screen {
         xpToggle = CycleButton.onOffBuilder(config.renderExperienceOverlay)
             .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.render_xp_overlay"), (button, value) -> {
                 config.renderExperienceOverlay = value;
+                LocatorConfigManager.save();
             });
         addRenderableWidget(xpToggle);
 
@@ -45,6 +47,7 @@ public final class LocatorConfigScreen extends Screen {
         hideXpCreativeToggle = CycleButton.onOffBuilder(config.hideXpInCreative)
             .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.hide_xp_creative"), (button, value) -> {
                 config.hideXpInCreative = value;
+                LocatorConfigManager.save();
             });
         addRenderableWidget(hideXpCreativeToggle);
 
@@ -52,6 +55,7 @@ public final class LocatorConfigScreen extends Screen {
         locatorDuringXpToggle = CycleButton.onOffBuilder(config.keepLocatorVisibleDuringXpGain)
             .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.keep_locator_during_xp"), (button, value) -> {
                 config.keepLocatorVisibleDuringXpGain = value;
+                LocatorConfigManager.save();
             });
         addRenderableWidget(locatorDuringXpToggle);
 
@@ -59,23 +63,24 @@ public final class LocatorConfigScreen extends Screen {
         locatorAlwaysOnToggle = CycleButton.onOffBuilder(config.alwaysShowLocator)
             .create(center - 100, y, 200, 20, Component.translatable("rpglocatorbar.config.always_show_locator"), (button, value) -> {
                 config.alwaysShowLocator = value;
+                LocatorConfigManager.save();
             });
         addRenderableWidget(locatorAlwaysOnToggle);
 
         y += 24;
         Button reset = Button.builder(Component.translatable("rpglocatorbar.config.default_settings"), b -> {
             LocatorConfig defaults = new LocatorConfig();
-            LocatorConfig live = LocatorConfigManager.get();
-            live.locatorYOffset = defaults.locatorYOffset;
-            live.renderExperienceOverlay = defaults.renderExperienceOverlay;
-            live.hideXpInCreative = defaults.hideXpInCreative;
-            live.keepLocatorVisibleDuringXpGain = defaults.keepLocatorVisibleDuringXpGain;
-            live.alwaysShowLocator = defaults.alwaysShowLocator;
-            offsetSlider.setOffset(live.locatorYOffset);
-            xpToggle.setValue(live.renderExperienceOverlay);
-            hideXpCreativeToggle.setValue(live.hideXpInCreative);
-            locatorDuringXpToggle.setValue(live.keepLocatorVisibleDuringXpGain);
-            locatorAlwaysOnToggle.setValue(live.alwaysShowLocator);
+            config.locatorYOffset = defaults.locatorYOffset;
+            config.renderExperienceOverlay = defaults.renderExperienceOverlay;
+            config.hideXpInCreative = defaults.hideXpInCreative;
+            config.keepLocatorVisibleDuringXpGain = defaults.keepLocatorVisibleDuringXpGain;
+            config.alwaysShowLocator = defaults.alwaysShowLocator;
+            offsetSlider.setOffset(config.locatorYOffset);
+            xpToggle.setValue(config.renderExperienceOverlay);
+            hideXpCreativeToggle.setValue(config.hideXpInCreative);
+            locatorDuringXpToggle.setValue(config.keepLocatorVisibleDuringXpGain);
+            locatorAlwaysOnToggle.setValue(config.alwaysShowLocator);
+            LocatorConfigManager.save();
         }).pos(center - 100, y).size(200, 20).build();
         addRenderableWidget(reset);
 
@@ -89,14 +94,12 @@ public final class LocatorConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        LocatorConfig config = LocatorConfigManager.get();
-        config.locatorYOffset = offsetSlider.getOffset();
-        LocatorConfigManager.save();
+        Minecraft.getInstance().setScreen(parent);
+    }
 
-        Minecraft client = Minecraft.getInstance();
-        if (client != null) {
-            client.setScreen(parent);
-        }
+    @Override
+    public void removed() {
+        LocatorConfigManager.save();
     }
 
     private static final class LocatorOffsetSlider extends AbstractSliderButton {
@@ -104,13 +107,7 @@ public final class LocatorConfigScreen extends Screen {
 
         LocatorOffsetSlider(int x, int y, int width, int height, int initialOffset) {
             super(x, y, width, height, Component.empty(), 0.0);
-            this.offset = Mth.clamp(initialOffset, MIN_OFFSET_PX, MAX_OFFSET_PX);
-            this.value = (this.offset - MIN_OFFSET_PX) / (double) (MAX_OFFSET_PX - MIN_OFFSET_PX);
-            updateMessage();
-        }
-
-        int getOffset() {
-            return offset;
+            setOffset(initialOffset);
         }
 
         void setOffset(int newOffset) {
@@ -128,6 +125,13 @@ public final class LocatorConfigScreen extends Screen {
         protected void applyValue() {
             double range = MAX_OFFSET_PX - MIN_OFFSET_PX;
             this.offset = Mth.clamp((int) Math.round(MIN_OFFSET_PX + this.value * range), MIN_OFFSET_PX, MAX_OFFSET_PX);
+            LocatorConfigManager.get().locatorYOffset = this.offset;
+        }
+
+        @Override
+        public void onRelease(MouseButtonEvent event) {
+            super.onRelease(event);
+            LocatorConfigManager.save();
         }
     }
 }
