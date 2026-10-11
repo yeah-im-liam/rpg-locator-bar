@@ -28,3 +28,6 @@ side = "CLIENT"
 
 [[mixins]]
 config = "rpglocatorbar-neoforge.mixins.json"
+
+[[mixins]]
+config = "rpglocatorbar-neoforge-locator.mixins.json"

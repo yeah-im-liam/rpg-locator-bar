@@ -12,11 +12,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import yeah.im.liam.rpglocatorbar.hud.LocatorHud;
 
-// NeoForge splits renderHotbarAndDecorations into per-layer methods, so both names are listed; Mixin skips the missing one.
 @Mixin(Gui.class)
 public abstract class GuiMixin {
     @Redirect(
-        method = { "renderHotbarAndDecorations", "renderContextualInfoBar" },
+        method = "renderHotbarAndDecorations",
         at = @At(
             value = "INVOKE",
             desc = @Desc(owner = ContextualBarRenderer.class, value = "render", args = { GuiGraphics.class, DeltaTracker.class })
@@ -28,7 +27,7 @@ public abstract class GuiMixin {
     }
 
     @Redirect(
-        method = { "renderHotbarAndDecorations", "renderExperienceLevel" },
+        method = "renderHotbarAndDecorations",
         at = @At(
             value = "INVOKE",
             desc = @Desc(owner = ContextualBarRenderer.class, value = "renderExperienceLevel", args = { GuiGraphics.class, Font.class, int.class })

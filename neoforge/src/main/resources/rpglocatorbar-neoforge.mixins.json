@@ -1,11 +1,10 @@
 {
   "required": true,
-  "package": "yeah.im.liam.rpglocatorbar.mixin",
+  "package": "yeah.im.liam.rpglocatorbar.neoforge.mixin",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
-    "GuiMixin",
-    "LocatorBarRendererMixin"
+    "GuiLayersMixin"
   ],
   "injectors": {
     "defaultRequire": 1
